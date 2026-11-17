@@ -1,0 +1,2104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+    <title>Records Lab: Advanced JavaScript Analytics</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;800&display=swap"
+    >
+
+    <style>
+        /* ================================
+           THEME VARIABLES
+        ================================= */
+
+        :root {
+            --bg: #eef2f6;
+            --sf: #fff;
+            --ink: #17212b;
+            --mu: #5a6877;
+            --ln: #d5dde6;
+            --ac: #0b7a75;
+            --s0: #7d8895;
+            --s1: #2f6fdb;
+            --s2: #c27a0b;
+            --s3: #1f9d55;
+
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            color-scheme: light;
+        }
+
+        /* Dark theme preference */
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg: #10161c;
+                --sf: #18212a;
+                --ink: #e6edf3;
+                --mu: #93a1af;
+                --ln: #2b3845;
+                --ac: #3cc4bc;
+                --s0: #8a96a3;
+                --s1: #6b9cf5;
+                --s2: #e0a042;
+                --s3: #4cc784;
+
+                color-scheme: dark;
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --bg: #10161c;
+            --sf: #18212a;
+            --ink: #e6edf3;
+            --mu: #93a1af;
+            --ln: #2b3845;
+            --ac: #3cc4bc;
+            --s0: #8a96a3;
+            --s1: #6b9cf5;
+            --s2: #e0a042;
+            --s3: #4cc784;
+
+            color-scheme: dark;
+        }
+
+        /* ================================
+           GLOBAL STYLES
+        ================================= */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font: 15px/1.5 "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px 16px 48px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0 0 4px;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: 17px;
+            margin: 0 0 10px;
+        }
+
+        p {
+            margin: 0 0 10px;
+            max-width: 70ch;
+        }
+
+        .mu {
+            color: var(--mu);
+        }
+
+        /* ================================
+           NAVIGATION TABS
+        ================================= */
+
+        nav {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin: 16px 0;
+            border-bottom: 2px solid var(--ln);
+        }
+
+        nav button {
+            background: none;
+            border: 0;
+            padding: 10px 14px;
+            font: inherit;
+            font-weight: 600;
+            color: var(--mu);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        nav button[aria-selected=true] {
+            color: var(--ac);
+            border-color: var(--ac);
+        }
+
+        /* ================================
+           BUTTONS AND INPUTS
+        ================================= */
+
+        button,
+        select,
+        input {
+            font: inherit;
+            color: inherit;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--ac);
+            outline-offset: 2px;
+        }
+
+        .btn {
+            background: var(--ac);
+            color: var(--sf);
+            border: 0;
+            border-radius: 6px;
+            padding: 7px 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn.alt {
+            background: none;
+            color: var(--ac);
+            border: 1px solid var(--ac);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        input,
+        select {
+            background: var(--sf);
+            border: 1px solid var(--ln);
+            border-radius: 6px;
+            padding: 7px 9px;
+            min-width: 0;
+        }
+
+        /* ================================
+           DASHBOARD LAYOUT
+        ================================= */
+
+        .grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        .box {
+            background: var(--sf);
+            border: 1px solid var(--ln);
+            border-radius: 8px;
+            padding: 14px;
+        }
+
+        .k {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 12px 0;
+        }
+
+        /* ================================
+           CHARTS AND CATEGORIES
+        ================================= */
+
+        .bar {
+            height: 10px;
+            border-radius: 5px;
+            background: var(--ac);
+        }
+
+        .cat {
+            display: grid;
+            grid-template-columns: 90px 1fr 36px;
+            gap: 8px;
+            align-items: center;
+            margin: 6px 0;
+            font-size: 13px;
+        }
+
+        .seg {
+            display: flex;
+            height: 16px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .lg span {
+            display: inline-block;
+            margin-right: 14px;
+            font-size: 13px;
+        }
+
+        .lg i {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            margin-right: 5px;
+        }
+
+        /* ================================
+           DATA TABLE
+        ================================= */
+
+        .tw {
+            overflow-x: auto;
+            background: var(--sf);
+            border: 1px solid var(--ln);
+            border-radius: 8px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        th,
+        td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--ln);
+        }
+
+        th {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--mu);
+        }
+
+        td.n {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        td.t {
+            cursor: pointer;
+            text-decoration: underline dotted;
+        }
+
+        .tag {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            border: 1px solid currentColor;
+        }
+
+        /* ================================
+           EXECUTION ORDER DEMO
+        ================================= */
+
+        ol.ord {
+            padding-left: 0;
+            list-style: none;
+            margin: 8px 0;
+        }
+
+        ol.ord li {
+            padding: 8px 10px;
+            border-left: 4px solid var(--ln);
+            background: var(--sf);
+            margin: 4px 0;
+            border-radius: 0 6px 6px 0;
+            font-size: 14px;
+        }
+
+        ol.ord li.sync {
+            border-color: var(--s1);
+        }
+
+        ol.ord li.micro {
+            border-color: var(--s3);
+        }
+
+        ol.ord li.macro {
+            border-color: var(--s2);
+        }
+
+        /* ================================
+           MESSAGES AND CODE
+        ================================= */
+
+        .toast {
+            min-height: 22px;
+            color: var(--ac);
+            font-weight: 600;
+            margin: 6px 0;
+        }
+
+        code {
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            font-size: 0.92em;
+        }
+
+        dt {
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        dd {
+            margin: 2px 0 0;
+            color: var(--mu);
+            max-width: 75ch;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        /* ================================
+           ACCESSIBILITY
+        ================================= */
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main>
+
+        <!-- ================================
+             PAGE HEADER
+        ================================= -->
+
+        <h1>Records Lab</h1>
+
+        <p class="mu">
+            A data-processing app that uses Map, Set, WeakMap, Symbol,
+            iterators, generators, and functional techniques on 150+ task records.
+        </p>
+
+        <!-- ================================
+             NAVIGATION
+        ================================= -->
+
+        <nav role="tablist" id="tabs">
+            <button role="tab" data-tab="dash" aria-selected="true">
+                Dashboard
+            </button>
+
+            <button role="tab" data-tab="loop" aria-selected="false">
+                Execution order
+            </button>
+
+            <button role="tab" data-tab="perf" aria-selected="false">
+                Performance
+            </button>
+
+            <button role="tab" data-tab="notes" aria-selected="false">
+                Explanation
+            </button>
+        </nav>
+
+        <!-- ================================
+             DASHBOARD SECTION
+        ================================= -->
+
+        <section id="dash">
+
+            <div class="grid" id="cards"></div>
+
+            <div class="grid" style="margin-top:12px">
+
+                <div class="box">
+                    <h2>Records by category</h2>
+                    <div id="cats"></div>
+                </div>
+
+                <div class="box">
+                    <h2>Status distribution</h2>
+                    <div id="stat"></div>
+                </div>
+
+            </div>
+
+            <!-- Search and filters -->
+
+            <div class="row">
+                <input
+                    id="q"
+                    type="search"
+                    placeholder="Search title or ID"
+                    aria-label="Search"
+                >
+
+                <select id="fs" aria-label="Status"></select>
+                <select id="fu" aria-label="User"></select>
+                <select id="fc" aria-label="Category"></select>
+            </div>
+
+            <!-- Dashboard actions -->
+
+            <div class="row">
+
+                <select id="dk" aria-label="Duplicate key">
+                    <option value="title">title</option>
+                    <option value="user">user</option>
+                    <option value="category">category</option>
+                    <option value="status">status</option>
+                </select>
+
+                <button class="btn alt" id="dedupe">
+                    Remove duplicates by property
+                </button>
+
+                <button class="btn alt" id="batch">
+                    Next batch of 10 (generator)
+                </button>
+
+                <button class="btn alt" id="reset">
+                    Reset data
+                </button>
+
+            </div>
+
+            <div class="toast" id="toast" role="status"></div>
+
+            <!-- Records table -->
+
+            <div class="tw">
+                <table>
+                    <thead id="thead"></thead>
+                    <tbody id="tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+
+            <div class="row">
+
+                <button class="btn alt" id="prev">
+                    Previous
+                </button>
+
+                <span id="pg" class="mu"></span>
+
+                <button class="btn alt" id="next">
+                    Next
+                </button>
+
+                <span class="mu" id="cache"></span>
+
+            </div>
+
+        </section>
+
+        <!-- ================================
+             EXECUTION ORDER SECTION
+        ================================= -->
+
+        <section id="loop" hidden>
+
+            <h2>Synchronous code, microtasks, and macrotasks</h2>
+
+            <p>
+                Run the demo, then compare the order in which steps actually
+                fired with the order you would predict. The list is built by
+                the callbacks themselves, so the order you see is the real order.
+            </p>
+
+            <button class="btn" id="runloop">
+                Run demo
+            </button>
+
+            <ol class="ord" id="order"></ol>
+
+            <p class="mu" id="why"></p>
+
+        </section>
+
+        <!-- ================================
+             PERFORMANCE SECTION
+        ================================= -->
+
+        <section id="perf" hidden>
+
+            <h2>Array search vs Map lookup</h2>
+
+            <p>
+                Finds 2,000 IDs in a 50,000-item collection using
+                <code>Array.find</code> (scans) and
+                <code>Map.get</code> (hash lookup).
+            </p>
+
+            <button class="btn" id="runperf">
+                Run comparison
+            </button>
+
+            <div class="grid" id="perfout" style="margin-top:12px"></div>
+
+            <p class="mu" id="perfnote"></p>
+
+        </section>
+
+        <!-- ================================
+             EXPLANATION SECTION
+        ================================= -->
+
+        <section id="notes" hidden>
+
+            <h2>How the code is organised</h2>
+
+            <dl>
+
+                <dt>fp module</dt>
+                <dd>
+                    Reusable functional helpers: <code>pipe</code>,
+                    <code>compose</code>, <code>curry</code>, and
+                    <code>memoize</code> (a closure holding a private cache Map).
+                </dd>
+
+                <dt>Data module</dt>
+                <dd>
+                    Sample data generation, validation, the store, Map indexes,
+                    Sets, immutable updates, deduplication, queries, pure
+                    calculations, the iterable, and the batch generator.
+                    It never touches the DOM.
+                </dd>
+
+                <dt>Demo module</dt>
+                <dd>
+                    Execution-order demo and the Array vs Map benchmark.
+                </dd>
+
+                <dt>UI module</dt>
+                <dd>
+                    Reads state, calls Data, and renders HTML.
+                    It owns all event handlers.
+                </dd>
+
+                <dt>Data structures</dt>
+                <dd>
+                    <code>Map</code> groups records by status, user, and
+                    category and indexes them by ID, so filters start from
+                    the smallest group instead of scanning all records.
+                    <code>Set</code> holds unique categories, users, and
+                    statuses and drives deduplication. A <code>WeakMap</code>
+                    stores view counts keyed by record object; when a record
+                    object is dropped, its entry can be garbage collected.
+                    A <code>Symbol</code> (<code>SRC</code>) marks each
+                    record's origin without clashing with normal property names.
+                </dd>
+
+                <dt>Functional techniques</dt>
+                <dd>
+                    Pure functions: <code>total</code>, <code>sumValue</code>,
+                    <code>avgValue</code>, <code>completionPct</code>.
+                    Currying: <code>where(key)(value)(record)</code>.
+                    Composition: queries use <code>pipe</code>.
+                    Memoization: <code>summarize</code> caches by data version
+                    plus filter, and is cleared whenever data changes.
+                    Immutability: records are frozen, and updates and dedupe
+                    return new objects and arrays.
+                </dd>
+
+                <dt>Iterator</dt>
+                <dd>
+                    <code>RecordCollection</code> implements
+                    <code>[Symbol.iterator]()</code> and returns an object
+                    with <code>next()</code>, so it works in <code>for...of</code>
+                    and spread. The generator <code>batches</code> wraps any
+                    iterable and yields 10 records per step; <code>yield*</code>
+                    delegates to it.
+                </dd>
+
+                <dt>Performance comparison</dt>
+                <dd>
+                    Array search is O(n) per lookup; Map is O(1) on average.
+                    Limits: one machine, one run, JIT warm-up and garbage
+                    collection add noise, <code>performance.now()</code> is
+                    deliberately coarse in browsers, and the Map costs extra
+                    memory and build time (shown separately).
+                </dd>
+
+                <dt>Safety</dt>
+                <dd>
+                    Invalid records (null, missing fields, bad status,
+                    impossible dates, negative values) are rejected on load
+                    and counted. Empty results show a message, search input
+                    is trimmed and escaped, and pages are clamped.
+                </dd>
+
+            </dl>
+
+        </section>
+
+    </main>
+
+    <!-- ================================
+         JAVASCRIPT
+    ================================= -->
+
+    <script>
+        'use strict';
+
+        /* =================================
+           MODULE: FP (FUNCTIONAL HELPERS)
+        ================================= */
+
+        const fp = {
+
+            pipe: (...f) => x =>
+                f.reduce((a, g) => g(a), x),
+
+            compose: (...f) => x =>
+                f.reduceRight((a, g) => g(a), x),
+
+            curry: fn => function c(...a) {
+                return a.length >= fn.length
+                    ? fn(...a)
+                    : (...b) => c(...a, ...b);
+            },
+
+            memoize(fn, keyFn = (...a) => JSON.stringify(a)) {
+
+                const cache = new Map();
+
+                const m = (...a) => {
+
+                    const k = keyFn(...a);
+
+                    if (cache.has(k)) {
+                        m.hits++;
+                        return cache.get(k);
+                    }
+
+                    m.misses++;
+
+                    const v = fn(...a);
+
+                    cache.set(k, v);
+
+                    return v;
+                };
+
+                m.hits = 0;
+                m.misses = 0;
+                m.clear = () => cache.clear();
+
+                return m;
+            }
+
+        };
+
+
+        /* =================================
+           MODULE: DATA (NO DOM ACCESS)
+        ================================= */
+
+        const Data = (() => {
+
+            /* Constants */
+
+            const STATUSES = [
+                'Todo',
+                'In progress',
+                'Review',
+                'Done'
+            ];
+
+            const CATS = [
+                'Frontend',
+                'Backend',
+                'Design',
+                'QA',
+                'DevOps',
+                'Docs'
+            ];
+
+            const USERS = [
+                'Amina',
+                'Bilal',
+                'Chen',
+                'Dara',
+                'Elif',
+                'Farid',
+                'Gita'
+            ];
+
+            const SORTABLE = [
+                'id',
+                'title',
+                'category',
+                'status',
+                'user',
+                'priority',
+                'date',
+                'value'
+            ];
+
+            const SRC = Symbol('source');
+
+            /* Random number generator */
+
+            const rng = seed => () =>
+                (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+
+
+            /* Generate sample records */
+
+            function generate(n = 150) {
+
+                const r = rng(42);
+
+                const pick = a =>
+                    a[Math.floor(r() * a.length)];
+
+                const verbs = [
+                    'Build',
+                    'Fix',
+                    'Review',
+                    'Plan',
+                    'Migrate',
+                    'Test'
+                ];
+
+                const nouns = [
+                    'login page',
+                    'API cache',
+                    'report export',
+                    'search index',
+                    'billing flow',
+                    'email alerts'
+                ];
+
+                const out = [];
+
+                for (let i = 1; i <= n; i++) {
+
+                    out.push({
+
+                        id: i,
+
+                        title: `${pick(verbs)} ${pick(nouns)}`,
+
+                        category: pick(CATS),
+
+                        status: pick(STATUSES),
+
+                        user: pick(USERS),
+
+                        priority: 1 + Math.floor(r() * 5),
+
+                        date: new Date(
+                            Date.UTC(2026, 0, 1 + Math.floor(r() * 320))
+                        ).toISOString().slice(0, 10),
+
+                        value: Math.round(r() * 9500 + 500)
+
+                    });
+
+                }
+
+                // Deliberately bad rows to show safe handling
+
+                out.push(
+                    null,
+                    { id: 'x' },
+                    {
+                        id: 999,
+                        title: 'Bad',
+                        category: 'QA',
+                        status: 'Nope',
+                        user: 'Amina',
+                        priority: 3,
+                        date: '2026-02-30',
+                        value: -5
+                    }
+                );
+
+                return out;
+            }
+
+
+            /* Validate records */
+
+            const isDate = s => {
+
+                try {
+
+                    return typeof s === 'string' &&
+                        new Date(s).toISOString().slice(0, 10) === s;
+
+                } catch {
+
+                    return false;
+
+                }
+
+            };
+
+
+            function validate(r) {
+
+                if (!r || typeof r !== 'object') {
+                    return null;
+                }
+
+                const {
+                    id,
+                    title,
+                    category,
+                    status,
+                    user,
+                    priority,
+                    date,
+                    value
+                } = r;
+
+                if (
+                    !Number.isInteger(id) ||
+                    typeof title !== 'string' ||
+                    !title.trim() ||
+                    !CATS.includes(category) ||
+                    !STATUSES.includes(status) ||
+                    typeof user !== 'string' ||
+                    !user ||
+                    !(priority >= 1 && priority <= 5) ||
+                    !isDate(date) ||
+                    !Number.isFinite(value) ||
+                    value < 0
+                ) {
+                    return null;
+                }
+
+                return Object.freeze({
+                    id,
+                    title: title.trim(),
+                    category,
+                    status,
+                    user,
+                    priority,
+                    date,
+                    value,
+                    [SRC]: 'sample-v1'
+                });
+
+            }
+
+
+            /* =================================
+               PURE CALCULATIONS
+            ================================= */
+
+            const total = rs => rs.length;
+
+            const sumValue = rs =>
+                rs.reduce((a, r) => a + r.value, 0);
+
+            const avgValue = rs =>
+                rs.length ? sumValue(rs) / rs.length : 0;
+
+            const completionPct = rs =>
+                rs.length
+                    ? 100 * rs.filter(r => r.status === 'Done').length / rs.length
+                    : 0;
+
+            const where = fp.curry((k, v, r) =>
+                r[k] === v
+            );
+
+            const groupBy = fp.curry((k, rs) =>
+                rs.reduce(
+                    (m, r) => (
+                        m.has(r[k])
+                            ? m.get(r[k]).push(r)
+                            : m.set(r[k], [r]),
+                        m
+                    ),
+                    new Map()
+                )
+            );
+
+            const dedupeBy = (k, rs) => {
+
+                const seen = new Set();
+
+                return rs.filter(r =>
+                    !seen.has(r[k]) && seen.add(r[k])
+                );
+
+            };
+
+
+            /* =================================
+               CUSTOM ITERABLE
+            ================================= */
+
+            class RecordCollection {
+
+                constructor(rs) {
+                    this.rs = Array.isArray(rs) ? rs : [];
+                }
+
+                [Symbol.iterator]() {
+
+                    let i = 0;
+
+                    const rs = this.rs;
+
+                    return {
+
+                        next: () =>
+                            i < rs.length
+                                ? {
+                                    value: rs[i++],
+                                    done: false
+                                }
+                                : {
+                                    value: undefined,
+                                    done: true
+                                },
+
+                        [Symbol.iterator]() {
+                            return this;
+                        }
+
+                    };
+
+                }
+
+            }
+
+
+            /* =================================
+               GENERATOR: LAZY BATCHES
+            ================================= */
+
+            function* batches(iterable, size = 10) {
+
+                let b = [];
+
+                for (const r of iterable) {
+
+                    b.push(r);
+
+                    if (b.length === size) {
+                        yield b;
+                        b = [];
+                    }
+
+                }
+
+                if (b.length) {
+                    yield b;
+                }
+
+            }
+
+
+            function* batchesOf(rs, size) {
+
+                yield* batches(
+                    new RecordCollection(rs),
+                    size
+                );
+
+            }
+
+
+            /* =================================
+               STORE: SINGLE SOURCE OF TRUTH
+            ================================= */
+
+            const store = {
+
+                records: [],
+                rejected: 0,
+                version: 0,
+                byId: new Map(),
+                groups: {},
+                sets: {},
+                meta: new WeakMap()
+
+            };
+
+
+            /* Set and rebuild indexes */
+
+            function set(records) {
+
+                store.records = Object.freeze([...records]);
+
+                store.byId = new Map(
+                    store.records.map(r => [r.id, r])
+                );
+
+                store.groups = {
+
+                    status: groupBy('status', store.records),
+
+                    user: groupBy('user', store.records),
+
+                    category: groupBy('category', store.records)
+
+                };
+
+                store.sets = {
+
+                    status: new Set(
+                        store.records.map(r => r.status)
+                    ),
+
+                    user: new Set(
+                        store.records.map(r => r.user)
+                    ),
+
+                    category: new Set(
+                        store.records.map(r => r.category)
+                    )
+
+                };
+
+                store.version++;
+
+                summarize.clear();
+
+            }
+
+
+            /* Load and validate data */
+
+            function load(raw) {
+
+                const list = Array.isArray(raw) ? raw : [];
+
+                const good = list
+                    .map(validate)
+                    .filter(Boolean);
+
+                store.rejected = list.length - good.length;
+
+                set(good);
+
+            }
+
+
+            /* Immutable update */
+
+            function update(id, patch) {
+
+                const old = store.byId.get(id);
+
+                if (!old || !patch || typeof patch !== 'object') {
+                    return null;
+                }
+
+                const next = Object.freeze({
+                    ...old,
+                    ...patch
+                });
+
+                const m = store.meta.get(old);
+
+                if (m) {
+                    store.meta.set(next, m);
+                }
+
+                set(
+                    store.records.map(r =>
+                        r === old ? next : r
+                    )
+                );
+
+                return { old, next };
+
+            }
+
+
+            /* Remove duplicate records */
+
+            function dedupe(key) {
+
+                if (!SORTABLE.includes(key)) {
+                    return 0;
+                }
+
+                const before = store.records.length;
+
+                set(
+                    dedupeBy(key, store.records)
+                );
+
+                return before - store.records.length;
+
+            }
+
+
+            /* Track views using WeakMap */
+
+            function view(r) {
+
+                const m = store.meta.get(r) || {
+                    views: 0
+                };
+
+                m.views++;
+
+                store.meta.set(r, m);
+
+                return m.views;
+
+            }
+
+
+            /* =================================
+               QUERY AND FILTER SYSTEM
+            ================================= */
+
+            function query({
+                q,
+                status,
+                user,
+                category,
+                sort,
+                dir
+            }) {
+
+                const eq = [
+                    ['status', status],
+                    ['user', user],
+                    ['category', category]
+                ].filter(([, v]) => v);
+
+                const base = eq.length
+                    ? eq
+                        .map(([k, v]) => store.groups[k].get(v) || [])
+                        .reduce((a, b) =>
+                            a.length <= b.length ? a : b
+                        )
+                    : store.records;
+
+                const needle = String(q ?? '')
+                    .trim()
+                    .toLowerCase();
+
+                const keep = r =>
+                    eq.every(([k, v]) => where(k, v, r)) &&
+                    (
+                        !needle ||
+                        r.title.toLowerCase().includes(needle) ||
+                        String(r.id) === needle
+                    );
+
+                const f = SORTABLE.includes(sort)
+                    ? sort
+                    : 'id';
+
+                const sign = dir === 'asc' ? 1 : -1;
+
+                const cmp = (a, b) =>
+                    (
+                        a[f] < b[f]
+                            ? -1
+                            : a[f] > b[f]
+                                ? 1
+                                : 0
+                    ) * sign;
+
+                return fp.pipe(
+                    rs => rs.filter(keep),
+                    rs => [...rs].sort(cmp)
+                )(base);
+
+            }
+
+
+            /* =================================
+               MEMOIZED SUMMARY
+            ================================= */
+
+            const summarize = fp.memoize(
+
+                (key, rows) => {
+
+                    const count = m =>
+                        new Map(
+                            [...groupBy('x', [])].concat(
+                                [...m].map(([k, v]) => [k, v.length])
+                            )
+                        );
+
+                    return {
+
+                        total: total(rows),
+
+                        sum: sumValue(rows),
+
+                        avg: avgValue(rows),
+
+                        done: completionPct(rows),
+
+                        byCategory: count(
+                            groupBy('category', rows)
+                        ),
+
+                        byStatus: count(
+                            groupBy('status', rows)
+                        )
+
+                    };
+
+                },
+
+                key => store.version + '|' + key
+
+            );
+
+
+            /* Export public Data module methods */
+
+            return {
+
+                STATUSES,
+                CATS,
+                USERS,
+                store,
+                generate,
+                load,
+                update,
+                dedupe,
+                view,
+                query,
+                summarize,
+                RecordCollection,
+                batchesOf,
+                SRC
+
+            };
+
+        })();
+
+
+        /* =================================
+           MODULE: DEMO
+        ================================= */
+
+        const Demo = {
+
+            /* Event loop execution order */
+
+            order(log) {
+
+                log('Synchronous: start', 'sync');
+
+                setTimeout(
+                    () => log('Macrotask: setTimeout(0)', 'macro'),
+                    0
+                );
+
+                Promise.resolve().then(() => {
+
+                    log('Microtask: Promise.then', 'micro');
+
+                    queueMicrotask(() =>
+                        log(
+                            'Microtask queued from a microtask',
+                            'micro'
+                        )
+                    );
+
+                });
+
+                queueMicrotask(() =>
+                    log('Microtask: queueMicrotask', 'micro')
+                );
+
+                log('Synchronous: end', 'sync');
+
+            },
+
+
+            /* Array vs Map performance */
+
+            perf() {
+
+                const N = 50000;
+                const L = 2000;
+
+                const arr = Array.from(
+                    { length: N },
+                    (_, i) => ({ id: i + 1 })
+                );
+
+                let t = performance.now();
+
+                const map = new Map(
+                    arr.map(o => [o.id, o])
+                );
+
+                const build = performance.now() - t;
+
+                const ids = Array.from(
+                    { length: L },
+                    (_, i) => (i * 7919) % N + 1
+                );
+
+                t = performance.now();
+
+                let a = 0;
+
+                for (const id of ids) {
+                    if (arr.find(o => o.id === id)) {
+                        a++;
+                    }
+                }
+
+                const ta = performance.now() - t;
+
+                t = performance.now();
+
+                let b = 0;
+
+                for (const id of ids) {
+                    if (map.get(id)) {
+                        b++;
+                    }
+                }
+
+                const tm = performance.now() - t;
+
+                return {
+                    N,
+                    L,
+                    ta,
+                    tm,
+                    build,
+                    a,
+                    b
+                };
+
+            }
+
+        };
+
+
+        /* =================================
+           MODULE: UI (ALL DOM WORK)
+        ================================= */
+
+        const UI = (() => {
+
+            /* Helper functions */
+
+            const $ = s =>
+                document.querySelector(s);
+
+            const esc = s =>
+                String(s).replace(
+                    /[&<>"']/g,
+                    c => ({
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#39;'
+                    }[c])
+                );
+
+            const money = n =>
+                '$' + Math.round(n).toLocaleString();
+
+            const SC = {
+
+                'Todo': 'var(--s0)',
+                'In progress': 'var(--s1)',
+                'Review': 'var(--s2)',
+                'Done': 'var(--s3)'
+
+            };
+
+
+            /* UI state */
+
+            const st = {
+
+                q: '',
+                status: '',
+                user: '',
+                category: '',
+                sort: 'date',
+                dir: 'desc',
+                page: 1,
+                size: 10
+
+            };
+
+            let batchGen = null;
+            let batchN = 0;
+
+
+            /* Toast message */
+
+            const toast = m => {
+                $('#toast').textContent = m;
+            };
+
+
+            /* Fill filter dropdowns */
+
+            function fillSelect(el, label, set) {
+
+                const cur = el.value;
+
+                el.innerHTML =
+                    `<option value="">${label}</option>` +
+                    [...set]
+                        .sort()
+                        .map(v =>
+                            `<option>${esc(v)}</option>`
+                        )
+                        .join('');
+
+                el.value = [...set].includes(cur)
+                    ? cur
+                    : '';
+
+            }
+
+
+            /* =================================
+               RENDER DASHBOARD
+            ================================= */
+
+            function render() {
+
+                const S = Data.store;
+
+                const rows = Data.query(st);
+
+                const pages = Math.max(
+                    1,
+                    Math.ceil(rows.length / st.size)
+                );
+
+                st.page = Math.min(
+                    Math.max(1, st.page),
+                    pages
+                );
+
+                const s = Data.summarize(
+                    JSON.stringify([
+                        st.q,
+                        st.status,
+                        st.user,
+                        st.category
+                    ]),
+                    rows
+                );
+
+
+                /* Populate filters */
+
+                fillSelect(
+                    $('#fs'),
+                    'All statuses',
+                    S.sets.status
+                );
+
+                fillSelect(
+                    $('#fu'),
+                    'All users',
+                    S.sets.user
+                );
+
+                fillSelect(
+                    $('#fc'),
+                    'All categories',
+                    S.sets.category
+                );
+
+
+                /* Summary cards */
+
+                $('#cards').innerHTML = [
+
+                    ['Records', s.total],
+
+                    ['Total value', money(s.sum)],
+
+                    ['Average value', money(s.avg)],
+
+                    ['Completed', s.done.toFixed(1) + '%']
+
+                ]
+                    .map(([l, v]) =>
+                        `<div class="box">
+                            <div class="mu">${l}</div>
+                            <div class="k">${v}</div>
+                        </div>`
+                    )
+                    .join('') +
+
+                    `<div class="box">
+                        <div class="mu">Rejected on load</div>
+                        <div class="k">${S.rejected}</div>
+                    </div>`;
+
+
+                /* Category chart */
+
+                const cats = [...s.byCategory]
+                    .sort((a, b) => b[1] - a[1]);
+
+                const mx = cats.length
+                    ? cats[0][1]
+                    : 1;
+
+                $('#cats').innerHTML = cats.length
+
+                    ? cats.map(([c, n]) =>
+                        `<div class="cat">
+                            <span>${esc(c)}</span>
+                            <div class="bar" style="width:${100 * n / mx}%"></div>
+                            <b>${n}</b>
+                        </div>`
+                    ).join('')
+
+                    : '<p class="mu">No data.</p>';
+
+
+                /* Status distribution */
+
+                $('#stat').innerHTML = s.total
+
+                    ? `<div class="seg">
+                        ${Data.STATUSES.map(k =>
+                            `<div style="
+                                width:${100 * (s.byStatus.get(k) || 0) / s.total}%;
+                                background:${SC[k]}
+                            "></div>`
+                        ).join('')}
+                    </div>
+
+                    <div class="lg">
+                        ${Data.STATUSES.map(k =>
+                            `<span>
+                                <i style="background:${SC[k]}"></i>
+                                ${k}: ${s.byStatus.get(k) || 0}
+                            </span>`
+                        ).join('')}
+                    </div>`
+
+                    : '<p class="mu">No data.</p>';
+
+
+                /* Table columns */
+
+                const cols = [
+
+                    ['id', 'ID'],
+                    ['title', 'Title'],
+                    ['category', 'Category'],
+                    ['status', 'Status'],
+                    ['user', 'User'],
+                    ['priority', 'Pri'],
+                    ['date', 'Date'],
+                    ['value', 'Value']
+
+                ];
+
+                $('#thead').innerHTML =
+                    '<tr>' +
+
+                    cols.map(([k, l]) =>
+                        `<th
+                            data-sort="${k}"
+                            aria-sort="${
+                                st.sort === k
+                                    ? (st.dir === 'asc'
+                                        ? 'ascending'
+                                        : 'descending')
+                                    : 'none'
+                            }"
+                        >
+                            ${l}
+                            ${
+                                st.sort === k
+                                    ? (st.dir === 'asc' ? ' ▲' : ' ▼')
+                                    : ''
+                            }
+                        </th>`
+                    ).join('') +
+
+                    '<th>Views</th><th></th></tr>';
+
+
+                /* Paginated records */
+
+                const page = rows.slice(
+                    (st.page - 1) * st.size,
+                    st.page * st.size
+                );
+
+
+                /* Table body */
+
+                $('#tbody').innerHTML = page.length
+
+                    ? page.map(r =>
+                        `<tr>
+                            <td>${r.id}</td>
+
+                            <td
+                                class="t"
+                                data-view="${r.id}"
+                                title="Click to count a view"
+                            >
+                                ${esc(r.title)}
+                            </td>
+
+                            <td>${esc(r.category)}</td>
+
+                            <td>
+                                <span
+                                    class="tag"
+                                    style="color:${SC[r.status]}"
+                                >
+                                    ${esc(r.status)}
+                                </span>
+                            </td>
+
+                            <td>${esc(r.user)}</td>
+
+                            <td class="n">${r.priority}</td>
+
+                            <td>${r.date}</td>
+
+                            <td class="n">${money(r.value)}</td>
+
+                            <td class="n">
+                                ${(S.meta.get(r) || { views: 0 }).views}
+                            </td>
+
+                            <td>
+                                ${
+                                    r.status === 'Done'
+                                        ? ''
+                                        : `<button
+                                            class="btn alt"
+                                            data-done="${r.id}"
+                                        >
+                                            Complete
+                                        </button>`
+                                }
+                            </td>
+                        </tr>`
+                    ).join('')
+
+                    : `<tr>
+                        <td colspan="10" class="mu">
+                            No records match. Clear the search or filters,
+                            or reset the data.
+                        </td>
+                    </tr>`;
+
+
+                /* Pagination information */
+
+                $('#pg').textContent =
+                    `Page ${st.page} of ${pages} (${rows.length} matching)`;
+
+                $('#prev').disabled = st.page <= 1;
+
+                $('#next').disabled = st.page >= pages;
+
+
+                /* Memoization cache information */
+
+                $('#cache').textContent =
+                    `Summary cache: ${Data.summarize.hits} hits, ` +
+                    `${Data.summarize.misses} misses`;
+
+
+                /* Reset generator */
+
+                batchGen = null;
+                batchN = 0;
+
+            }
+
+
+            /* Update filter state */
+
+            const upd = (k, v) => {
+
+                st[k] = v;
+                st.page = 1;
+
+                render();
+
+            };
+
+
+            /* =================================
+               INITIALIZE UI AND EVENT HANDLERS
+            ================================= */
+
+            function init() {
+
+                Data.load(Data.generate());
+
+
+                /* Tab navigation */
+
+                $('#tabs').onclick = e => {
+
+                    const b = e.target.closest('[data-tab]');
+
+                    if (!b) {
+                        return;
+                    }
+
+                    document.querySelectorAll('#tabs button')
+                        .forEach(x =>
+                            x.setAttribute(
+                                'aria-selected',
+                                x === b
+                            )
+                        );
+
+                    ['dash', 'loop', 'perf', 'notes']
+                        .forEach(id =>
+                            $('#' + id).hidden = id !== b.dataset.tab
+                        );
+
+                };
+
+
+                /* Search input */
+
+                $('#q').oninput = e =>
+                    upd('q', e.target.value.slice(0, 80));
+
+
+                /* Filter events */
+
+                $('#fs').onchange = e =>
+                    upd('status', e.target.value);
+
+                $('#fu').onchange = e =>
+                    upd('user', e.target.value);
+
+                $('#fc').onchange = e =>
+                    upd('category', e.target.value);
+
+
+                /* Table sorting */
+
+                $('#thead').onclick = e => {
+
+                    const th = e.target.closest('[data-sort]');
+
+                    if (!th) {
+                        return;
+                    }
+
+                    st.dir =
+                        st.sort === th.dataset.sort &&
+                        st.dir === 'asc'
+                            ? 'desc'
+                            : 'asc';
+
+                    st.sort = th.dataset.sort;
+
+                    render();
+
+                };
+
+
+                /* Table actions */
+
+                $('#tbody').onclick = e => {
+
+                    const v = e.target.closest('[data-view]');
+
+                    const d = e.target.closest('[data-done]');
+
+
+                    /* Count record views */
+
+                    if (v) {
+
+                        const n = Data.view(
+                            Data.store.byId.get(+v.dataset.view)
+                        );
+
+                        render();
+
+                        toast(
+                            `Record #${v.dataset.view} viewed ${n} time(s). ` +
+                            'Count is held in a WeakMap, not on the record.'
+                        );
+
+                    }
+
+
+                    /* Mark record as completed */
+
+                    if (d) {
+
+                        const res = Data.update(
+                            +d.dataset.done,
+                            { status: 'Done' }
+                        );
+
+                        if (res) {
+
+                            render();
+
+                            toast(
+                                `Created an updated copy of #${res.next.id} ` +
+                                `(${res.next.status}). The original object ` +
+                                `still says "${res.old.status}".`
+                            );
+
+                        }
+
+                    }
+
+                };
+
+
+                /* Pagination buttons */
+
+                $('#prev').onclick = () => {
+
+                    st.page--;
+
+                    render();
+
+                };
+
+                $('#next').onclick = () => {
+
+                    st.page++;
+
+                    render();
+
+                };
+
+
+                /* Remove duplicates */
+
+                $('#dedupe').onclick = () => {
+
+                    const k = $('#dk').value;
+
+                    const n = Data.dedupe(k);
+
+                    render();
+
+                    toast(
+                        n
+                            ? `Removed ${n} records with a repeated ${k} (first of each kept).`
+                            : `No duplicates found for ${k}.`
+                    );
+
+                };
+
+
+                /* Reset data */
+
+                $('#reset').onclick = () => {
+
+                    Data.load(Data.generate());
+
+                    Data.summarize.hits =
+                        Data.summarize.misses = 0;
+
+                    render();
+
+                    toast('Data reset.');
+
+                };
+
+
+                /* Generator batch processing */
+
+                $('#batch').onclick = () => {
+
+                    if (!batchGen) {
+
+                        batchGen = Data.batchesOf(
+                            Data.query(st),
+                            10
+                        );
+
+                        batchN = 0;
+
+                    }
+
+                    const { value, done } = batchGen.next();
+
+                    if (done) {
+
+                        batchGen = null;
+
+                        toast(
+                            'All batches processed. Press again to start over.'
+                        );
+
+                        return;
+
+                    }
+
+                    batchN++;
+
+                    toast(
+                        `Batch ${batchN}: ${value.length} records, ` +
+                        `value ${money(
+                            value.reduce((a, r) => a + r.value, 0)
+                        )}. The generator only computed this batch.`
+                    );
+
+                };
+
+
+                /* =================================
+                   EVENT LOOP DEMONSTRATION
+                ================================= */
+
+                $('#runloop').onclick = () => {
+
+                    const ol = $('#order');
+
+                    ol.innerHTML = '';
+
+                    let n = 0;
+
+                    const t0 = performance.now();
+
+                    const log = (msg, cls) => {
+
+                        const li = document.createElement('li');
+
+                        li.className = cls;
+
+                        li.textContent =
+                            `${++n}. ${msg} ` +
+                            `(+${(performance.now() - t0).toFixed(1)} ms)`;
+
+                        ol.appendChild(li);
+
+                    };
+
+                    Demo.order(log);
+
+                    $('#why').textContent =
+                        'Synchronous code finishes first. The microtask queue ' +
+                        'then drains completely (including microtasks queued ' +
+                        'by microtasks). Only after that can the event loop ' +
+                        'take the next macrotask, such as the timer.';
+
+                };
+
+
+                /* =================================
+                   PERFORMANCE COMPARISON
+                ================================= */
+
+                $('#runperf').onclick = () => {
+
+                    const r = Demo.perf();
+
+                    const f = n => n.toFixed(2) + ' ms';
+
+                    $('#perfout').innerHTML = [
+
+                        [
+                            'Array.find',
+                            f(r.ta),
+                            `${r.a} found`
+                        ],
+
+                        [
+                            'Map.get',
+                            f(r.tm),
+                            `${r.b} found`
+                        ],
+
+                        [
+                            'Map build cost',
+                            f(r.build),
+                            `${r.N.toLocaleString()} entries`
+                        ],
+
+                        [
+                            'Speed-up',
+                            (r.ta / Math.max(r.tm, 0.01)).toFixed(0) + 'x',
+                            'lookup only'
+                        ]
+
+                    ]
+                        .map(([l, v, s]) =>
+                            `<div class="box">
+                                <div class="mu">${l}</div>
+                                <div class="k">${v}</div>
+                                <div class="mu">${s}</div>
+                            </div>`
+                        )
+                        .join('');
+
+
+                    $('#perfnote').textContent =
+                        'Single run on your device. Results vary with JIT ' +
+                        'warm-up, garbage collection, and timer precision. ' +
+                        'The Map pays a build cost and extra memory, so it wins ' +
+                        'when you look up many times.';
+
+                };
+
+
+                /* Initial dashboard render */
+
+                render();
+
+            }
+
+
+            return { init };
+
+        })();
+
+
+        /* =================================
+           START APPLICATION
+        ================================= */
+
+        UI.init();
+
+    </script>
+
+</body>
+
+</html>
